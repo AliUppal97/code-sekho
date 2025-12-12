@@ -1,0 +1,48 @@
+# CodeOwners file for CodeSekho
+# This file defines code ownership for different parts of the repository
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners - these users will be requested for review on all PRs
+* @codesekho/team-leads
+
+# Core application code
+/src/app/ @codesekho/frontend-team
+/src/components/ @codesekho/frontend-team
+/src/lib/ @codesekho/frontend-team
+
+# Server-side code and API
+/src/server/ @codesekho/backend-team
+/src/app/api/ @codesekho/backend-team
+
+# Configuration files
+*.config.ts @codesekho/devops-team
+*.config.js @codesekho/devops-team
+*.config.mjs @codesekho/devops-team
+package.json @codesekho/team-leads
+package-lock.json @codesekho/team-leads
+
+# CI/CD and deployment
+/.github/ @codesekho/devops-team
+Dockerfile @codesekho/devops-team
+docker-compose.yml @codesekho/devops-team
+
+# Documentation
+*.md @codesekho/team-leads
+/docs/ @codesekho/team-leads
+
+# Tests
+*.test.ts @codesekho/qa-team
+*.test.tsx @codesekho/qa-team
+*.spec.ts @codesekho/qa-team
+*.spec.tsx @codesekho/qa-team
+vitest.config.ts @codesekho/qa-team
+
+# Type definitions
+*.d.ts @codesekho/frontend-team
+tsconfig.json @codesekho/frontend-team
+
+# Styling
+tailwind.config.ts @codesekho/frontend-team
+postcss.config.mjs @codesekho/frontend-team
+/src/app/globals.css @codesekho/frontend-team
+
