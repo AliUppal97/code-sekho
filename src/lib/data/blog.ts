@@ -33,3 +33,4 @@ export const BLOG_POSTS: BlogPost[] = [
     readingTime: "7 min read",
   },
 ];
+

@@ -125,3 +125,4 @@ export const FEATURED_COURSES: Course[] = [
     ],
   },
 ];
+
