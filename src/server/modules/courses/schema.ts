@@ -12,3 +12,4 @@ export type CourseQuery = z.infer<typeof courseQuerySchema>;
 
 
 
+
