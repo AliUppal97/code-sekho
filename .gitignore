@@ -1,18 +1,28 @@
 # Dependency directories
 node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
 
 # Next.js build output
 .next/
 out/
+.vercel/
+.swc/
 
 # General build artifacts
 dist/
 build/
 .turbo/
 .cache/
+.parcel-cache/
 
 # TypeScript
 *.tsbuildinfo
+*.tsbuildinfo.*
 
 # Logs and diagnostics
 logs/
@@ -21,35 +31,99 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 *.pid
 *.pid.lock
 
 # Testing and coverage
 coverage/
 .nyc_output/
+.jest/
+.vitest/
+*.lcov
+.coveralls.yml
 
 # Env files (keep examples only)
 .env*
 !.env.example
+!.env.template
 
 # Runtime data
 tmp/
 temp/
 *.sqlite
+*.sqlite3
+*.db
 
 # Package archives
 *.tgz
+*.tar.gz
 
 # IDE/editor noise
 .idea/
 .vscode/
 .history/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
 
 # OS-generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 Desktop.ini
+$RECYCLE.BIN/
 
-# Vercel/hosting
-.vercel/
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Misc
+*.pem
+.cache/
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Storybook
+storybook-static/
+
+# Sentry
+.sentryclirc
+
+# Turborepo
+.turbo
+
+# PWA files
+**/public/sw.js
+**/public/workbox-*.js
+**/public/worker-*.js
+**/public/sw.js.map
+**/public/workbox-*.js.map
+**/public/worker-*.js.map
 
