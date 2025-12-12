@@ -218,3 +218,4 @@ export function CompanyCarousel({ companies, className }: CompanyCarouselProps) 
 
 
 
+
