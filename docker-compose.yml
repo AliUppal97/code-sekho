@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codesekho-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:3000/api
+      - LOG_LEVEL=info
+    env_file:
+      - .env.local
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - codesekho-network
+
+  # Uncomment if you need a database
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: codesekho-db
+  #   environment:
+  #     - POSTGRES_USER=codesekho
+  #     - POSTGRES_PASSWORD=changeme
+  #     - POSTGRES_DB=codesekho
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - codesekho-network
+  #   restart: unless-stopped
+
+networks:
+  codesekho-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:
+
