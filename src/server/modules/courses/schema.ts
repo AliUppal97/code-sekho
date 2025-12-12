@@ -11,3 +11,4 @@ export const courseQuerySchema = z.object({
 export type CourseQuery = z.infer<typeof courseQuerySchema>;
 
 
+
