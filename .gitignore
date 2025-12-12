@@ -1,0 +1,55 @@
+# Dependency directories
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# General build artifacts
+dist/
+build/
+.turbo/
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs and diagnostics
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.pid
+*.pid.lock
+
+# Testing and coverage
+coverage/
+.nyc_output/
+
+# Env files (keep examples only)
+.env*
+!.env.example
+
+# Runtime data
+tmp/
+temp/
+*.sqlite
+
+# Package archives
+*.tgz
+
+# IDE/editor noise
+.idea/
+.vscode/
+.history/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Vercel/hosting
+.vercel/
+
