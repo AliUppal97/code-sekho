@@ -44,3 +44,4 @@ export default function BlogPage() {
     </PageShell>
   );
 }
+
