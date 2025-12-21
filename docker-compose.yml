@@ -24,28 +24,32 @@ services:
     networks:
       - codesekho-network
 
-  # Uncomment if you need a database
-  # db:
-  #   image: postgres:15-alpine
-  #   container_name: codesekho-db
-  #   environment:
-  #     - POSTGRES_USER=codesekho
-  #     - POSTGRES_PASSWORD=changeme
-  #     - POSTGRES_DB=codesekho
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   networks:
-  #     - codesekho-network
-  #   restart: unless-stopped
+  db:
+    image: postgres:15-alpine
+    container_name: codesekho-db
+    environment:
+      - POSTGRES_USER=codesekho
+      - POSTGRES_PASSWORD=changeme
+      - POSTGRES_DB=codesekho
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - codesekho-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codesekho"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   codesekho-network:
     driver: bridge
 
-# volumes:
-#   postgres_data:
+volumes:
+  postgres_data:
 
 
 
