@@ -1,0 +1,384 @@
+// ============================================================================
+// Prisma Schema - CodeSekho Database
+// Enterprise-grade database schema with proper relationships
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// User & Authentication
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String
+  avatar        String?
+  role          UserRole  @default(STUDENT)
+  emailVerified Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  
+  // Relations
+  enrollments      Enrollment[]
+  courseProgress   CourseProgress[]
+  videoProgress    VideoProgress[]
+  notifications    Notification[]
+  payments         Payment[]
+  reviews          Review[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+// ============================================================================
+// Courses & Content
+// ============================================================================
+
+model Course {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  description     String   @db.Text
+  shortDescription String  @db.Text
+  thumbnail       String
+  categoryId      String
+  instructorId    String
+  level           CourseLevel
+  duration        Int      // in minutes
+  price           Decimal  @db.Decimal(10, 2)
+  discountPrice   Decimal? @db.Decimal(10, 2)
+  isFeatured      Boolean  @default(false)
+  isPublished     Boolean  @default(false)
+  rating          Float    @default(0)
+  reviewCount     Int      @default(0)
+  enrollmentCount Int      @default(0)
+  
+  // Relations
+  category      CourseCategory @relation(fields: [categoryId], references: [id])
+  instructor    User           @relation(fields: [instructorId], references: [id])
+  lessons       Lesson[]
+  enrollments   Enrollment[]
+  courseProgress CourseProgress[]
+  reviews       Review[]
+  tags          CourseTag[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([instructorId])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@map("courses")
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model CourseCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  icon        String
+  color       String
+  description String?  @db.Text
+  
+  courses Course[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@map("course_categories")
+}
+
+model CourseTag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  courseId  String
+  
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+  @@map("course_tags")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?  @db.Text
+  duration    Int      // in minutes
+  videoUrl    String
+  thumbnailUrl String?
+  order       Int
+  isPreview   Boolean  @default(false)
+  
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  resources   Resource[]
+  videoProgress VideoProgress[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([order])
+  @@map("lessons")
+}
+
+model Resource {
+  id        String       @id @default(cuid())
+  lessonId  String
+  title     String
+  type      ResourceType
+  url       String
+  
+  lesson    Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@index([lessonId])
+  @@map("resources")
+}
+
+enum ResourceType {
+  PDF
+  CODE
+  LINK
+  FILE
+}
+
+// ============================================================================
+// Enrollment & Progress Tracking
+// ============================================================================
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  progress  Int      @default(0) // percentage
+  completed Boolean  @default(false)
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+model CourseProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  progress  Int      @default(0) // percentage
+  lastAccessedAt DateTime?
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@map("course_progress")
+}
+
+model VideoProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String
+  progress  Int      @default(0) // percentage (0-100)
+  watched   Boolean  @default(false)
+  watchTime Int      @default(0) // in seconds
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@map("video_progress")
+}
+
+// ============================================================================
+// Interview Preparation
+// ============================================================================
+
+model InterviewSubject {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  icon        String
+  color       String
+  courseCount  Int      @default(0)
+  questionCount Int     @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@map("interview_subjects")
+}
+
+model InterviewCompany {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  slug          String   @unique
+  logo          String
+  description   String?  @db.Text
+  industry      String
+  expectedSalary String?
+  applicationLink String?
+  hireDate      String?
+  courseCount   Int      @default(0)
+  questionCount Int      @default(0)
+  interviewTips String[] // Array of tips
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@map("interview_companies")
+}
+
+// ============================================================================
+// Reviews & Ratings
+// ============================================================================
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  rating    Int      // 1-5
+  comment   String?  @db.Text
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([rating])
+  @@map("reviews")
+}
+
+// ============================================================================
+// Payments & Transactions
+// ============================================================================
+
+model Payment {
+  id            String        @id @default(cuid())
+  userId        String
+  courseId      String?
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("USD")
+  status        PaymentStatus @default(PENDING)
+  paymentMethod String?
+  stripePaymentId String?    @unique
+  transactionId String?       @unique
+  
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([stripePaymentId])
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+// ============================================================================
+// Notifications
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  read      Boolean          @default(false)
+  actionUrl String?
+  
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+// ============================================================================
+// Analytics & Tracking
+// ============================================================================
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  eventType String
+  metadata  Json?    // Flexible JSON for event data
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("analytics_events")
+}
+
+
