@@ -1,39 +1,39 @@
 import { NextRequest } from 'next/server';
-import { ZodError } from 'zod';
-
 import { jsonResponse, withErrorHandling } from '@/server/core/http';
-import { AppError } from '@/server/core/errors';
-import { courseQuerySchema } from '@/server/modules/courses/schema';
-import { listCourses } from '@/server/modules/courses/service';
+import { validateQuery, validateBody, rateLimit } from '@/server/middleware';
+import { courseQuerySchema, createCourseSchema } from '@/server/modules/courses/schema';
+import { listCourses, createCourse } from '@/server/modules/courses/service';
+import { authenticateRequest, requireRole } from '@/server/middleware/auth';
 
-export const dynamic = 'force-dynamic';
-
-export function GET(request: NextRequest) {
-  return withErrorHandling(() => {
-    const parsed = courseQuerySchema.safeParse(
-      Object.fromEntries(request.nextUrl.searchParams.entries()),
-    );
-
-    if (!parsed.success) {
-      throw AppError.badRequest('Invalid course query parameters', formatZodErrors(parsed.error));
+export async function GET(request: NextRequest) {
+  return withErrorHandling(async () => {
+    await rateLimit(request);
+    
+    const query = await validateQuery(request, courseQuerySchema);
+    
+    // Try to get user if authenticated
+    let userId: string | undefined;
+    try {
+      const user = await authenticateRequest(request, false);
+      userId = user?.userId;
+    } catch {
+      // Not authenticated, continue
     }
-
-    const result = listCourses(parsed.data);
-    return jsonResponse(result);
+    
+    const result = await listCourses(query, userId);
+    return jsonResponse(result, 200);
   });
 }
 
-function formatZodErrors(error: ZodError) {
-  const formatted: Record<string, string> = {};
-  const issues = error.flatten().fieldErrors;
-  Object.entries(issues).forEach(([field, messages]) => {
-    if (messages && messages.length > 0) {
-      formatted[field] = messages[0];
-    }
+export async function POST(request: NextRequest) {
+  return withErrorHandling(async () => {
+    await rateLimit(request, 'strict');
+    
+    const user = await requireRole('INSTRUCTOR', 'ADMIN')(request);
+    const input = await validateBody(request, createCourseSchema);
+    
+    const course = await createCourse(input, user.userId);
+    return jsonResponse(course, 201, 'Course created successfully');
   });
-  return formatted;
 }
-
-
-
 

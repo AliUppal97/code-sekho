@@ -275,3 +275,5 @@ export default function CompanyDetailPage({ params }: PageProps) {
 
 
 
+
+
